@@ -2,7 +2,9 @@ import 'package:car_navigation/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+
 import 'core/bindings/controller_binder.dart';
+import 'core/config/flavor_config.dart';
 import 'core/utils/theme/theme.dart';
 
 class MyApp extends StatelessWidget {
@@ -15,7 +17,7 @@ class MyApp extends StatelessWidget {
       designSize: const Size(360, 690),
       minTextAdapt: true,
       splitScreenMode: true,
-// Use builder only if you need to use library outside ScreenUtilInit context
+      // Use builder only if you need to use library outside ScreenUtilInit context
       builder: (_, child) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
@@ -25,6 +27,16 @@ class MyApp extends StatelessWidget {
           themeMode: ThemeMode.system,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
+          builder: (context, child) {
+            final app = child ?? const SizedBox.shrink();
+            if (!Get.find<FlavorConfig>().isDev) return app;
+            return Banner(
+              message: 'DEV',
+              location: BannerLocation.topEnd,
+              color: Colors.red,
+              child: app,
+            );
+          },
         );
       },
     );

@@ -1,4 +1,4 @@
-package com.example.car_navigation
+package com.nuhan.navtest
 
 import io.flutter.embedding.android.FlutterActivity
 
