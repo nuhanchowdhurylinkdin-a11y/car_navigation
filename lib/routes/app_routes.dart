@@ -1,13 +1,12 @@
+import 'package:car_navigation/features/home/view/screen/home_screen.dart';
 import 'package:get/get.dart';
 
-import '../features/authentication/presentation/screens/login_screen.dart';
-
 class AppRoute {
-  static String loginScreen = "/loginScreen";
+  static String homeScreen = "/homeScreen";
 
-  static String getLoginScreen() => loginScreen;
+  static String getHomeScreen() => homeScreen;
 
   static List<GetPage> routes = [
-    GetPage(name: loginScreen, page: () => const HomeScreen()),
+    GetPage(name: homeScreen, page: () => const HomeScreen()),
   ];
 }

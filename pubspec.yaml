@@ -45,6 +45,8 @@ dependencies:
   web_socket_channel: ^3.0.3
   persistent_bottom_nav_bar_v2: ^6.4.0
   flutter_otp_text_field: ^1.5.1+1
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
 
 dev_dependencies:
   flutter_test:
