@@ -59,6 +59,26 @@ No location? Use **Pick start point on map**, then long-press twice: start (A), 
 - Map tiles aren't cached for offline use.
 - Location updates only run while the app is in the foreground. No background tracking.
 
+## Credits
+
+- UI design inspired by my Google Stitch project: https://stitch.withgoogle.com/projects/16858786000116327658
+- Project created from my template: https://github.com/nuhan021/flutter_nimo_cli.git
+
+## References
+
+- Platform channels: https://docs.flutter.dev/platform-integration/platform-channels
+- EventChannel: https://api.flutter.dev/flutter/services/EventChannel-class.html
+- Location updates (Android): https://developer.android.com/develop/sensors-and-location/location/request-updates
+- FusedLocationProviderClient: https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderClient
+- Runtime permissions: https://developer.android.com/training/permissions/requesting
+- Flutter flavors: https://docs.flutter.dev/deployment/flavors
+- OSRM API: http://project-osrm.org/docs/v5.24.0/api/
+- OSM tile usage policy: https://operations.osmfoundation.org/policies/tiles/
+- Encoded polyline format: https://developers.google.com/maps/documentation/utilities/polylinealgorithm
+- Distance and bearing formulas: https://www.movable-type.co.uk/scripts/latlong.html
+- flutter_map: https://docs.fleaflet.dev/
+- GetX: https://pub.dev/packages/get
+
 ## Assumptions
 
 - Location permission is asked only after the user taps "Use my location", not on launch.
