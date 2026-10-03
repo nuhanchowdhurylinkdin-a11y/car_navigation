@@ -3,9 +3,16 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/constants/colors.dart';
 
 class MapHint extends StatelessWidget {
-  const MapHint({super.key, required this.text});
+  const MapHint({
+    super.key,
+    required this.text,
+    this.icon = Icons.touch_app_outlined,
+    this.color = AppColors.primary,
+  });
 
   final String text;
+  final IconData icon;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +29,7 @@ class MapHint extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.touch_app_outlined, size: 18, color: AppColors.primary),
+          Icon(icon, size: 18, color: color),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
