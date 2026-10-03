@@ -16,6 +16,7 @@ class OsrmApiService {
 
   static const _timeout = Duration(seconds: 10);
   static const _userAgent = 'NavTest/1.0 (com.nuhan.navtest)';
+  static const _maxSnapMeters = 500.0; 
 
   Future<OsrmModel> fetchRoute({required LatLng start, required LatLng end}) async {
     final coords = '${start.longitude},${start.latitude};'
@@ -51,6 +52,10 @@ class OsrmApiService {
     final model = OsrmModel.fromJson(json);
     if (model.routes.isEmpty || model.routes.first.geometry.isEmpty) {
       throw const NoRouteException();
+    }
+
+    if (model.waypoints.isNotEmpty && model.waypoints.last.distance > _maxSnapMeters) {
+      throw const NoRouteException('That spot is too far from any road');
     }
     return model;
   }
