@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
+import '../../features/directions/controller/route_controller.dart';
+import '../../features/directions/service/osrm_api_service.dart';
 import '../../features/home/controller/home_controller.dart';
 import '../../features/location/controller/location_controller.dart';
 import '../../features/location/services/location_service.dart';
@@ -16,8 +19,18 @@ class ControllerBinder extends Bindings {
       () => LocationController(Get.find<LocationService>()),
       fenix: true,
     );
+    Get.lazyPut<RouteController>(
+      () => RouteController(
+        OsrmApiService(
+          baseUrl: Get.find<FlavorConfig>().routingBaseUrl,
+          client: http.Client(),
+        ),
+        Get.find<LocationController>(),
+      ),
+      fenix: true,
+    );
     Get.lazyPut<HomeController>(
-      () => HomeController(Get.find<LocationController>()),
+      () => HomeController(Get.find<LocationController>(), Get.find<RouteController>()),
       fenix: true,
     );
   }
