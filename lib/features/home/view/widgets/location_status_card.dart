@@ -113,8 +113,8 @@ class LocationStatusCard extends StatelessWidget {
           ),
         LocationStatus.ready => null,
         LocationStatus.denied => _SheetContent(
-            eyebrow: 'PERMISSION NEEDED',
-            icon: Icons.location_disabled_rounded,
+            eyebrow: 'LOCATION ACCESS',
+            icon: Icons.location_off_outlined,
             color: AppColors.warning,
             title: 'Location permission needed',
             body: 'Without your location we can\'t start the route from where you are.',
@@ -125,18 +125,19 @@ class LocationStatusCard extends StatelessWidget {
           ),
         LocationStatus.deniedForever => _SheetContent(
             eyebrow: 'PERMISSION BLOCKED',
-            icon: Icons.lock_outline_rounded,
+            icon: Icons.location_disabled_rounded,
             color: AppColors.error,
             title: 'Location is blocked for NavTest',
-            body: 'Enable it in App Settings → Permissions → Location, then come back.',
+            body: 'You chose \'Don\'t allow\'. Turn on location permission in '
+                'App Settings → Permissions → Location.',
             actionLabel: 'Open App Settings',
             actionIcon: Icons.settings,
             action: onOpenAppSettings,
             offersManualStart: true,
           ),
         LocationStatus.serviceDisabled => _SheetContent(
-            eyebrow: 'LOCATION OFF',
-            icon: Icons.location_off_rounded,
+            eyebrow: 'SYSTEM SETTINGS',
+            icon: Icons.gps_off_rounded,
             color: AppColors.textSecondary,
             title: 'Your device location is turned off',
             body: 'Turn on Location in your phone settings to find where you are.',
@@ -146,7 +147,7 @@ class LocationStatusCard extends StatelessWidget {
             offersManualStart: true,
           ),
         LocationStatus.timeout => _SheetContent(
-            eyebrow: 'NO GPS SIGNAL',
+            eyebrow: 'GPS TIMEOUT',
             icon: Icons.timer_off_outlined,
             color: AppColors.warning,
             title: 'Couldn\'t get a GPS fix',

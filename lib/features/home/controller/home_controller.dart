@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/constants/map_constants.dart';
 import '../../directions/controller/route_controller.dart';
 import '../../directions/model/route_path.dart';
 import '../../location/controller/location_controller.dart';
@@ -51,6 +52,24 @@ class HomeController extends GetxController {
   void recenterOnUser() {
     final fix = location.position.value;
     if (fix != null) mapController.move(fix.latLng, userZoom);
+  }
+
+  void zoomIn() => _zoomBy(1);
+
+  void zoomOut() => _zoomBy(-1);
+
+  void onMyLocationPressed() {
+    if (location.hasLocation) {
+      recenterOnUser();
+    } else {
+      location.useMyLocation();
+    }
+  }
+
+  void _zoomBy(double delta) {
+    final camera = mapController.camera;
+    final zoom = (camera.zoom + delta).clamp(MapConstants.minZoom, MapConstants.maxZoom);
+    mapController.move(camera.center, zoom.toDouble());
   }
 
   void fitRoute(RoutePath path) {

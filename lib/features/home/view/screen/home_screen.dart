@@ -5,6 +5,7 @@ import '../../../directions/controller/route_controller.dart';
 import '../../../location/controller/location_controller.dart';
 import '../../controller/home_controller.dart';
 import '../widgets/location_status_card.dart';
+import '../widgets/map_controls.dart';
 import '../widgets/map_hint.dart';
 import '../widgets/map_view.dart';
 import '../widgets/osm_attribution.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends GetView<HomeController> {
               userPosition: location.position.value,
               destination: route.destination.value,
               routePoints: route.path.value?.points ?? const [],
+              showPendingLine: route.status.value == RouteStatus.loading,
               onLongPress: route.setDestination,
             ),
           ),
@@ -34,9 +36,8 @@ class HomeScreen extends GetView<HomeController> {
             alignment: Alignment.topCenter,
             child: SafeArea(
               child: Obx(
-                () => location.status.value == LocationStatus.ready &&
-                        route.status.value == RouteStatus.idle
-                    ? const MapHint(text: 'Long-press the map to set a destination')
+                () => route.status.value == RouteStatus.idle
+                    ? const MapHint(text: 'Long-press the map to pick a destination')
                     : const SizedBox.shrink(),
               ),
             ),
@@ -48,16 +49,12 @@ class HomeScreen extends GetView<HomeController> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Obx(
-                  () => location.hasLocation
-                      ? Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: FloatingActionButton.small(
-                            onPressed: controller.recenterOnUser,
-                            tooltip: 'My location',
-                            child: const Icon(Icons.my_location),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
+                  () => MapControls(
+                    onZoomIn: controller.zoomIn,
+                    onZoomOut: controller.zoomOut,
+                    onMyLocation: controller.onMyLocationPressed,
+                    hasLocation: location.hasLocation,
+                  ),
                 ),
                 // Kept outside the map so the sheet never covers the required credit.
                 const OsmAttribution(),

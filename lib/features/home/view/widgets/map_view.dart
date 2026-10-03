@@ -16,6 +16,7 @@ class MapView extends StatelessWidget {
     this.userPosition,
     this.destination,
     this.routePoints = const [],
+    this.showPendingLine = false,
     this.onLongPress,
   });
 
@@ -23,6 +24,7 @@ class MapView extends StatelessWidget {
   final GeoPosition? userPosition;
   final LatLng? destination;
   final List<LatLng> routePoints;
+  final bool showPendingLine;
   final void Function(LatLng point)? onLongPress;
 
   @override
@@ -45,6 +47,17 @@ class MapView extends StatelessWidget {
           userAgentPackageName: MapConstants.userAgentPackageName,
           maxZoom: MapConstants.maxZoom,
         ),
+        if (showPendingLine && user != null && target != null && routePoints.isEmpty)
+          PolylineLayer(
+            polylines: [
+              Polyline(
+                points: [user.latLng, target],
+                strokeWidth: 3,
+                color: AppColors.textSecondary.withValues(alpha: 0.8),
+                pattern: StrokePattern.dashed(segments: const [10, 8]),
+              ),
+            ],
+          ),
         if (routePoints.length > 1)
           PolylineLayer(
             polylines: [

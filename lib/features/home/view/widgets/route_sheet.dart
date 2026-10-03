@@ -34,7 +34,7 @@ class RouteSheet extends StatelessWidget {
     final route = path;
     final failure = error;
     return switch (status) {
-      RouteStatus.loading => _loading(context),
+      RouteStatus.loading => isSlow ? _slow(context) : _loading(context),
       RouteStatus.success when route != null => _ready(context, route),
       RouteStatus.error when failure != null => _error(context, failure),
       _ => const SizedBox.shrink(),
@@ -42,39 +42,45 @@ class RouteSheet extends StatelessWidget {
   }
 
   Widget _loading(BuildContext context) {
-    final theme = Theme.of(context);
     return SheetPanel(
+      progressColor: AppColors.primary,
       children: [
-        SheetHeader(
-          eyebrow: isSlow ? 'SLOW SERVER' : 'ROUTING',
+        const SheetHeader(
           title: 'Finding the best driving route…',
-          color: isSlow ? AppColors.warning : AppColors.primary,
-          loading: true,
-          trailing: _closeButton(),
+          subtitle: 'Asking the OSRM routing server',
+          color: AppColors.primary,
+          icon: Icons.alt_route_rounded,
         ),
         const SizedBox(height: 16),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            minHeight: 4,
-            color: isSlow ? AppColors.warning : AppColors.primary,
-            backgroundColor: AppColors.tint,
-          ),
+        const _StatsSkeleton(),
+        const SizedBox(height: 12),
+        _DestinationRow(
+          destination: destination,
+          trailing: SheetTextButton(label: 'Cancel', onPressed: onClear),
         ),
-        if (isSlow) ...[
-          const SizedBox(height: 12),
-          Text(
-            'Still working… the free public routing server is slow right now.',
-            style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-          ),
-        ],
+      ],
+    );
+  }
+
+  Widget _slow(BuildContext context) {
+    return SheetPanel(
+      progressColor: AppColors.warning,
+      children: [
+        const SheetHeader(
+          title: 'Still working… the routing server is slow',
+          subtitle: 'The free public routing server is taking longer than usual. Hang on a few more seconds.',
+          color: AppColors.warning,
+          icon: Icons.schedule_rounded,
+        ),
+        const SizedBox(height: 16),
+        const _StatsSkeleton(),
+        const SizedBox(height: 16),
+        SheetSecondaryButton(label: 'Cancel', onPressed: onClear),
       ],
     );
   }
 
   Widget _ready(BuildContext context, RoutePath route) {
-    final theme = Theme.of(context);
-    final target = destination;
     return SheetPanel(
       children: [
         Row(
@@ -85,29 +91,10 @@ class RouteSheet extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
-          decoration: BoxDecoration(
-            color: AppColors.tint,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.location_on, color: AppColors.error, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  target == null
-                      ? 'Dropped pin'
-                      : 'Dropped pin · ${target.latitude.toStringAsFixed(4)}, '
-                          '${target.longitude.toStringAsFixed(4)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _closeButton(),
-            ],
-          ),
+        _DestinationRow(
+          destination: destination,
+          filled: true,
+          trailing: SheetCloseButton(onPressed: onClear, tooltip: 'Clear destination'),
         ),
         if (onStart != null) ...[
           const SizedBox(height: 16),
@@ -118,11 +105,11 @@ class RouteSheet extends StatelessWidget {
             color: AppColors.accent,
           ),
         ] else ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             'Long-press anywhere to change the destination.',
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
           ),
         ],
       ],
@@ -130,52 +117,172 @@ class RouteSheet extends StatelessWidget {
   }
 
   Widget _error(BuildContext context, RouteException failure) {
-    final theme = Theme.of(context);
-    final (icon, color, eyebrow, title) = switch (failure) {
-      NoRouteException() => (Icons.wrong_location_outlined, AppColors.error, 'NO ROUTE', 'No drivable route'),
-      RouteNetworkException() => (Icons.wifi_off_rounded, AppColors.error, 'OFFLINE', 'You\'re offline'),
-      RouteTimeoutException() => (Icons.hourglass_empty_rounded, AppColors.warning, 'TIMEOUT', 'Routing server didn\'t respond'),
-      RouteServerException() => (Icons.cloud_off_rounded, AppColors.warning, 'SERVER ERROR', 'Couldn\'t get a route'),
+    final (icon, color, title, body) = switch (failure) {
+      NoRouteException() => (
+          Icons.wrong_location_outlined,
+          AppColors.error,
+          'No drivable route',
+          'We couldn\'t find a road route to this point. Try a spot closer to a street.',
+        ),
+      RouteNetworkException() => (
+          Icons.wifi_off_rounded,
+          AppColors.error,
+          'You\'re offline',
+          'Check your internet connection and try again.',
+        ),
+      RouteTimeoutException() => (
+          Icons.hourglass_empty_rounded,
+          AppColors.warning,
+          'Routing server didn\'t respond',
+          'The free public routing server is busy. Please try again in a moment.',
+        ),
+      RouteServerException() => (
+          Icons.cloud_off_rounded,
+          AppColors.warning,
+          'Couldn\'t get a route',
+          'The routing server returned an error. Please try again.',
+        ),
     };
-    final body = switch (failure) {
-      NoRouteException() => 'We couldn\'t find a road route to this point. Try a spot closer to a street.',
-      RouteNetworkException() => 'Check your internet connection and try again.',
-      RouteTimeoutException() => 'The free public routing server is busy. Please try again in a moment.',
-      RouteServerException() => failure.message,
+    final detail = switch (failure) {
+      NoRouteException(:final message) when message != const NoRouteException().message => message,
+      _ => null,
     };
-    final isNoRoute = failure is NoRouteException;
+    final dismissInHeader = failure is NoRouteException || failure is RouteTimeoutException;
 
     return SheetPanel(
       children: [
         SheetHeader(
-          eyebrow: eyebrow,
           title: title,
+          subtitle: body,
           color: color,
           icon: icon,
-          trailing: _closeButton(),
+          trailing: dismissInHeader
+              ? SheetCloseButton(onPressed: onClear, tooltip: 'Clear destination')
+              : null,
         ),
-        const SizedBox(height: 14),
-        Text(
-          body,
-          style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary, height: 1.45),
-        ),
-        const SizedBox(height: 20),
-        if (isNoRoute)
-          SheetPrimaryButton(label: 'Choose another point', icon: Icons.touch_app_outlined, onPressed: onClear)
-        else ...[
-          SheetPrimaryButton(label: 'Retry', icon: Icons.refresh, onPressed: onRetry),
-          const SizedBox(height: 4),
-          SheetTextButton(label: 'Dismiss', onPressed: onClear),
+        if (detail != null) ...[
+          const SizedBox(height: 14),
+          SheetInfoChip(icon: Icons.info_outline_rounded, text: detail),
         ],
+        const SizedBox(height: 20),
+        switch (failure) {
+          NoRouteException() => SheetPrimaryButton(
+              label: 'Choose another point',
+              icon: Icons.my_location_rounded,
+              onPressed: onClear,
+            ),
+          RouteTimeoutException() => SheetPrimaryButton(
+              label: 'Retry',
+              icon: Icons.refresh_rounded,
+              onPressed: onRetry,
+            ),
+          RouteNetworkException() || RouteServerException() => Row(
+              children: [
+                Expanded(child: SheetSecondaryButton(label: 'Dismiss', onPressed: onClear)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SheetPrimaryButton(
+                    label: 'Retry',
+                    icon: Icons.refresh_rounded,
+                    onPressed: onRetry,
+                  ),
+                ),
+              ],
+            ),
+        },
       ],
     );
   }
+}
 
-  Widget _closeButton() => IconButton(
-        onPressed: onClear,
-        tooltip: 'Clear destination',
-        icon: const Icon(Icons.close, color: AppColors.textSecondary),
-      );
+class _DestinationRow extends StatelessWidget {
+  const _DestinationRow({required this.destination, required this.trailing, this.filled = false});
+
+  final LatLng? destination;
+  final Widget trailing;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final target = destination;
+    return Container(
+      padding: EdgeInsets.fromLTRB(filled ? 12 : 0, 4, 0, 4),
+      decoration: filled
+          ? BoxDecoration(color: AppColors.tint, borderRadius: BorderRadius.circular(12))
+          : null,
+      child: Row(
+        children: [
+          const Icon(Icons.location_on, color: AppColors.error, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'To: Selected pin ',
+                    style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  ),
+                  if (target != null)
+                    TextSpan(
+                      text: '(${_format(target)})',
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                ],
+              ),
+              style: theme.textTheme.bodyMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          trailing,
+        ],
+      ),
+    );
+  }
+
+  static String _format(LatLng point) {
+    final lat = '${point.latitude.abs().toStringAsFixed(4)}° ${point.latitude >= 0 ? 'N' : 'S'}';
+    final lng = '${point.longitude.abs().toStringAsFixed(4)}° ${point.longitude >= 0 ? 'E' : 'W'}';
+    return '$lat, $lng';
+  }
+}
+
+class _StatsSkeleton extends StatelessWidget {
+  const _StatsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: const Row(
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                SkeletonBox(width: 88, height: 22),
+                SizedBox(height: 8),
+                SkeletonBox(width: 56, height: 10),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                SkeletonBox(width: 88, height: 22),
+                SizedBox(height: 8),
+                SkeletonBox(width: 56, height: 10),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Stat extends StatelessWidget {
