@@ -28,6 +28,8 @@ class RouteController extends GetxController {
   final Duration slowAfter;
 
   final destination = Rxn<LatLng>();
+  final manualMode = false.obs;
+  final manualStart = Rxn<LatLng>();
   final path = Rxn<RoutePath>();
   final status = RouteStatus.idle.obs;
   final error = Rxn<RouteException>();
@@ -48,7 +50,9 @@ class RouteController extends GetxController {
       time: debounceTime,
     );
     _locationWorker = ever<GeoPosition?>(_location.position, (fix) {
-      if (fix != null && status.value == RouteStatus.noLocation) fetchRoute();
+      if (fix != null && !manualMode.value && status.value == RouteStatus.noLocation) {
+        fetchRoute();
+      }
     });
   }
 
@@ -61,22 +65,57 @@ class RouteController extends GetxController {
     super.onClose();
   }
 
+  LatLng? get startPoint =>
+      manualMode.value ? manualStart.value : _location.position.value?.latLng;
+
+  bool get needsManualStart => manualMode.value && manualStart.value == null;
+
+  void onMapLongPress(LatLng point) {
+    if (needsManualStart) {
+      setManualStart(point);
+    } else {
+      setDestination(point);
+    }
+  }
+
   void setDestination(LatLng point) {
     HapticFeedback.mediumImpact();
     _requestId++;
     destination.value = point;
     path.value = null;
     error.value = null;
-    status.value = _location.hasLocation ? RouteStatus.loading : RouteStatus.noLocation;
+    status.value = startPoint != null ? RouteStatus.loading : RouteStatus.noLocation;
+  }
+
+  void enterManualMode() {
+    _resetRoute();
+    manualMode.value = true;
+    manualStart.value = null;
+    destination.value = null;
+  }
+
+  void setManualStart(LatLng point) {
+    HapticFeedback.mediumImpact();
+    _resetRoute();
+    manualStart.value = point;
+    if (destination.value != null) fetchRoute();
+  }
+
+  void changeManualStart() {
+    _resetRoute();
+    manualStart.value = null;
+  }
+
+  void exitManualMode() {
+    _resetRoute();
+    manualMode.value = false;
+    manualStart.value = null;
+    destination.value = null;
   }
 
   void clearDestination() {
-    _requestId++;
-    _stopSlowTimer();
+    _resetRoute();
     destination.value = null;
-    path.value = null;
-    error.value = null;
-    status.value = RouteStatus.idle;
   }
 
   Future<void> retry() => fetchRoute();
@@ -85,9 +124,9 @@ class RouteController extends GetxController {
     final end = destination.value;
     if (end == null || isClosed) return;
 
-    final start = _location.position.value?.latLng;
+    final start = startPoint;
     if (start == null) {
-      status.value = RouteStatus.noLocation;
+      status.value = manualMode.value ? RouteStatus.idle : RouteStatus.noLocation;
       return;
     }
 
@@ -122,6 +161,14 @@ class RouteController extends GetxController {
     } finally {
       if (_isCurrent(requestId)) _stopSlowTimer();
     }
+  }
+
+  void _resetRoute() {
+    _requestId++;
+    _stopSlowTimer();
+    path.value = null;
+    error.value = null;
+    status.value = RouteStatus.idle;
   }
 
   bool _isCurrent(int requestId) => requestId == _requestId && !isClosed;

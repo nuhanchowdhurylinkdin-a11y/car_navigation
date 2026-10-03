@@ -62,8 +62,13 @@ class HomeController extends GetxController {
     if (location.hasLocation) {
       recenterOnUser();
     } else {
-      location.useMyLocation();
+      useMyLocationInstead();
     }
+  }
+
+  void useMyLocationInstead() {
+    route.exitManualMode();
+    location.useMyLocation();
   }
 
   void _zoomBy(double delta) {

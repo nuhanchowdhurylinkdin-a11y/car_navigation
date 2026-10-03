@@ -5,7 +5,9 @@ import '../../../../core/utils/constants/colors.dart';
 import '../../../directions/controller/route_controller.dart';
 import '../../../directions/model/route_exception.dart';
 import '../../../directions/model/route_path.dart';
+import 'point_row.dart';
 import 'sheet_parts.dart';
+import 'start_marker.dart';
 
 class RouteSheet extends StatelessWidget {
   const RouteSheet({
@@ -18,6 +20,8 @@ class RouteSheet extends StatelessWidget {
     required this.onRetry,
     required this.onClear,
     this.onStart,
+    this.start,
+    this.onChangeStart,
   });
 
   final RouteStatus status;
@@ -29,6 +33,10 @@ class RouteSheet extends StatelessWidget {
   final VoidCallback onClear;
   final VoidCallback? onStart;
 
+  /// Manually picked start point; null when routing from the device location.
+  final LatLng? start;
+  final VoidCallback? onChangeStart;
+
   @override
   Widget build(BuildContext context) {
     final route = path;
@@ -39,6 +47,26 @@ class RouteSheet extends StatelessWidget {
       RouteStatus.error when failure != null => _error(context, failure),
       _ => const SizedBox.shrink(),
     };
+  }
+
+  static const _pinIcon = Icon(Icons.location_on, color: AppColors.error, size: 22);
+
+  List<Widget> _startRow({bool filled = false}) {
+    final from = start;
+    final change = onChangeStart;
+    if (from == null) return const [];
+    return [
+      PointRow(
+        leading: const StartMarker(diameter: 22),
+        label: 'From: Start point',
+        point: from,
+        filled: filled,
+        trailing: change == null
+            ? const SizedBox.shrink()
+            : SheetTextButton(label: 'Change', onPressed: change),
+      ),
+      const SizedBox(height: 8),
+    ];
   }
 
   Widget _loading(BuildContext context) {
@@ -54,8 +82,11 @@ class RouteSheet extends StatelessWidget {
         const SizedBox(height: 16),
         const _StatsSkeleton(),
         const SizedBox(height: 12),
-        _DestinationRow(
-          destination: destination,
+        ..._startRow(),
+        PointRow(
+          leading: _pinIcon,
+          label: 'To: Selected pin',
+          point: destination,
           trailing: SheetTextButton(label: 'Cancel', onPressed: onClear),
         ),
       ],
@@ -91,8 +122,11 @@ class RouteSheet extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _DestinationRow(
-          destination: destination,
+        ..._startRow(filled: true),
+        PointRow(
+          leading: _pinIcon,
+          label: 'To: Selected pin',
+          point: destination,
           filled: true,
           trailing: SheetCloseButton(onPressed: onClear, tooltip: 'Clear destination'),
         ),
@@ -192,59 +226,6 @@ class RouteSheet extends StatelessWidget {
         },
       ],
     );
-  }
-}
-
-class _DestinationRow extends StatelessWidget {
-  const _DestinationRow({required this.destination, required this.trailing, this.filled = false});
-
-  final LatLng? destination;
-  final Widget trailing;
-  final bool filled;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final target = destination;
-    return Container(
-      padding: EdgeInsets.fromLTRB(filled ? 12 : 0, 4, 0, 4),
-      decoration: filled
-          ? BoxDecoration(color: AppColors.tint, borderRadius: BorderRadius.circular(12))
-          : null,
-      child: Row(
-        children: [
-          const Icon(Icons.location_on, color: AppColors.error, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'To: Selected pin ',
-                    style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                  ),
-                  if (target != null)
-                    TextSpan(
-                      text: '(${_format(target)})',
-                      style: const TextStyle(color: AppColors.textSecondary),
-                    ),
-                ],
-              ),
-              style: theme.textTheme.bodyMedium,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          trailing,
-        ],
-      ),
-    );
-  }
-
-  static String _format(LatLng point) {
-    final lat = '${point.latitude.abs().toStringAsFixed(4)}° ${point.latitude >= 0 ? 'N' : 'S'}';
-    final lng = '${point.longitude.abs().toStringAsFixed(4)}° ${point.longitude >= 0 ? 'E' : 'W'}';
-    return '$lat, $lng';
   }
 }
 

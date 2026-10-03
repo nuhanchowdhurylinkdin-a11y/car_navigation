@@ -28,6 +28,8 @@ http.Response okRoute(double distance) => http.Response(
     );
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late LocationController location;
   late Map<String, Completer<http.Response>> pending;
   late RouteController controller;
@@ -115,5 +117,62 @@ void main() {
 
     expect(controller.status.value, RouteStatus.idle);
     expect(controller.path.value, isNull);
+  });
+
+  group('manual start (no device location)', () {
+    const a = LatLng(23.70, 90.30);
+    const b = LatLng(23.75, 90.35);
+    const manualPath = '/route/v1/driving/90.3,23.7;90.35,23.75';
+
+    setUp(() {
+      location.position.value = null;
+      controller.enterManualMode();
+    });
+
+    test('first long-press sets start A without a request, second sets destination B', () async {
+      controller.onMapLongPress(a);
+      expect(controller.manualStart.value, a);
+      expect(controller.destination.value, isNull);
+      expect(pending, isEmpty);
+
+      controller.onMapLongPress(b);
+      expect(controller.destination.value, b);
+      expect(controller.status.value, RouteStatus.loading);
+
+      final request = controller.fetchRoute();
+      await Future<void>.delayed(Duration.zero);
+      pending[manualPath]!.complete(okRoute(5000));
+      await request;
+
+      expect(controller.status.value, RouteStatus.success);
+      expect(controller.path.value!.distanceMeters, 5000);
+    });
+
+    test('changing the start keeps the destination and re-routes from the new start', () async {
+      controller.onMapLongPress(const LatLng(23.0, 90.0));
+      controller.onMapLongPress(b);
+      controller.changeManualStart();
+
+      expect(controller.manualStart.value, isNull);
+      expect(controller.destination.value, b);
+      expect(controller.needsManualStart, isTrue);
+
+      controller.onMapLongPress(a);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(pending.keys, contains(manualPath));
+    });
+
+    test('exiting manual mode clears both points', () {
+      controller.onMapLongPress(a);
+      controller.onMapLongPress(b);
+
+      controller.exitManualMode();
+
+      expect(controller.manualMode.value, isFalse);
+      expect(controller.manualStart.value, isNull);
+      expect(controller.destination.value, isNull);
+      expect(controller.status.value, RouteStatus.idle);
+    });
   });
 }

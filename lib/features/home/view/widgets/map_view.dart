@@ -7,6 +7,7 @@ import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/constants/map_constants.dart';
 import '../../../location/models/geo_position.dart';
 import 'destination_marker.dart';
+import 'start_marker.dart';
 import 'user_location_marker.dart';
 
 class MapView extends StatelessWidget {
@@ -15,6 +16,7 @@ class MapView extends StatelessWidget {
     this.mapController,
     this.userPosition,
     this.destination,
+    this.manualStart,
     this.routePoints = const [],
     this.showPendingLine = false,
     this.onLongPress,
@@ -23,6 +25,7 @@ class MapView extends StatelessWidget {
   final MapController? mapController;
   final GeoPosition? userPosition;
   final LatLng? destination;
+  final LatLng? manualStart;
   final List<LatLng> routePoints;
   final bool showPendingLine;
   final void Function(LatLng point)? onLongPress;
@@ -31,6 +34,8 @@ class MapView extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = userPosition;
     final target = destination;
+    final startPin = manualStart;
+    final routeStart = startPin ?? user?.latLng;
 
     return FlutterMap(
       mapController: mapController,
@@ -47,11 +52,11 @@ class MapView extends StatelessWidget {
           userAgentPackageName: MapConstants.userAgentPackageName,
           maxZoom: MapConstants.maxZoom,
         ),
-        if (showPendingLine && user != null && target != null && routePoints.isEmpty)
+        if (showPendingLine && routeStart != null && target != null && routePoints.isEmpty)
           PolylineLayer(
             polylines: [
               Polyline(
-                points: [user.latLng, target],
+                points: [routeStart, target],
                 strokeWidth: 3,
                 color: AppColors.textSecondary.withValues(alpha: 0.8),
                 pattern: StrokePattern.dashed(segments: const [10, 8]),
@@ -94,6 +99,17 @@ class MapView extends StatelessWidget {
             ],
           ),
         ],
+        if (startPin != null)
+          MarkerLayer(
+            markers: [
+              Marker(
+                point: startPin,
+                width: StartMarker.size,
+                height: StartMarker.size,
+                child: const StartMarker(),
+              ),
+            ],
+          ),
         if (target != null)
           MarkerLayer(
             markers: [
