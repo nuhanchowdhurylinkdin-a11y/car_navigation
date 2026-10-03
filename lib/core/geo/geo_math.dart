@@ -7,7 +7,6 @@ class GeoMath {
 
   static const double earthRadiusMeters = 6371008.8;
 
-  /// Great-circle distance between two points (haversine).
   static double distanceMeters(LatLng a, LatLng b) {
     final lat1 = _rad(a.latitude);
     final lat2 = _rad(b.latitude);
@@ -18,7 +17,6 @@ class GeoMath {
     return 2 * earthRadiusMeters * math.asin(math.sqrt(h.clamp(0.0, 1.0)));
   }
 
-  /// Initial compass bearing from [a] to [b]: 0° = north, 90° = east.
   static double bearingDegrees(LatLng a, LatLng b) {
     final lat1 = _rad(a.latitude);
     final lat2 = _rad(b.latitude);
@@ -28,8 +26,7 @@ class GeoMath {
     return normalizeDegrees(_deg(math.atan2(y, x)));
   }
 
-  /// Signed smallest rotation from [from] to [to], always in (-180°, 180°].
-  /// 359° → 1° gives +2°, not -358°.
+  // 359 -> 1 gives +2, not -358.
   static double shortestAngleDelta(double from, double to) {
     final delta = ((to - from + 540) % 360) - 180;
     return delta == -180 ? 180 : delta;

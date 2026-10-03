@@ -1,10 +1,6 @@
 package com.nuhan.navtest.location
 
-/**
- * Error codes sent to Dart via `result.error(code, ...)`.
- * The Dart side maps each code to a typed LocationException, so these
- * strings are part of the channel contract and must match exactly.
- */
+// Keep in sync with NativeLocationService.mapError on the Dart side.
 object LocationErrors {
     const val PERMISSION_DENIED = "PERMISSION_DENIED"
     const val PERMISSION_DENIED_FOREVER = "PERMISSION_DENIED_FOREVER"

@@ -9,11 +9,9 @@ import '../models/location_permission_status.dart';
 import '../services/location_service.dart';
 
 enum LocationStatus {
-  /// Nothing requested yet; the UI explains why location is needed.
   idle,
   requestingPermission,
 
-  /// Waiting for the first fix.
   locating,
   ready,
   denied,
@@ -39,7 +37,6 @@ class LocationController extends GetxController {
   AppLifecycleListener? _lifecycle;
   bool _busy = false;
 
-  /// Set when we send the user to a Settings page, so we re-check on return.
   bool _awaitingSettings = false;
 
   bool get hasLocation => position.value != null;
@@ -61,7 +58,6 @@ class LocationController extends GetxController {
     super.onClose();
   }
 
-  /// Full flow: service check → permission → first fix → live tracking.
   Future<void> useMyLocation() async {
     if (_busy) return;
     _busy = true;
@@ -122,7 +118,6 @@ class LocationController extends GetxController {
     );
   }
 
-  /// Cancelling the subscription makes the native side remove its location request.
   void _stopTracking() {
     _positionSub?.cancel();
     _positionSub = null;

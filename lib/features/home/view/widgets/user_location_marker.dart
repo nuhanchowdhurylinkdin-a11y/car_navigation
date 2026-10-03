@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Blue "you are here" dot with a repeating ripple around it.
 class UserLocationMarker extends StatefulWidget {
   const UserLocationMarker({super.key});
 
-  /// Marker box size; the ripple grows to fill it while the dot stays centered.
   static const double size = 72;
   static const double dotSize = 22;
   static const Color color = Color(0xFF1E88E5);
@@ -37,7 +35,6 @@ class _UserLocationMarkerState extends State<UserLocationMarker>
           AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
-              // Each ripple is offset in time so they take turns.
               final t = (_controller.value + i / _rippleCount) % 1.0;
               final diameter = UserLocationMarker.dotSize +
                   (UserLocationMarker.size - UserLocationMarker.dotSize) * t;

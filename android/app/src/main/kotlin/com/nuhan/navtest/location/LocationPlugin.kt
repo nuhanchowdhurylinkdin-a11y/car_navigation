@@ -6,15 +6,7 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
-/**
- * Exposes native location to Dart:
- *  - MethodChannel "com.nuhan.navtest/location" for one-shot calls
- *  - EventChannel "com.nuhan.navtest/location_stream" for live updates
- * The channel contract (method names, arguments, error codes) is platform-agnostic
- * so an iOS implementation can be added without changing Dart code.
- */
 class LocationPlugin(activity: Activity, messenger: BinaryMessenger) : MethodChannel.MethodCallHandler {
-
     companion object {
         const val METHOD_CHANNEL = "com.nuhan.navtest/location"
         const val EVENT_CHANNEL = "com.nuhan.navtest/location_stream"

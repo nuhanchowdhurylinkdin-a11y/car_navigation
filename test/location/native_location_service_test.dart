@@ -60,7 +60,6 @@ void main() {
   });
 
   test('reports unsupported when no native handler exists', () async {
-    // No mock handler registered → MissingPluginException (e.g. iOS today).
     await expectLater(service.checkPermission(), throwsA(isA<LocationUnsupportedException>()));
   });
 }

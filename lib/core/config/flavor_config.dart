@@ -1,7 +1,5 @@
 import 'package:flutter/services.dart';
 
-/// Per-flavor configuration. The active flavor comes from `--flavor`
-/// (Android productFlavors) via Flutter's built-in [appFlavor].
 class FlavorConfig {
   final String name;
   final String routingBaseUrl;

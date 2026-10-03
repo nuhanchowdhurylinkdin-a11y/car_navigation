@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../../location/controller/location_controller.dart';
 import 'sheet_parts.dart';
 
-/// Bottom sheet explaining the current location state and offering the next action.
 class LocationStatusCard extends StatelessWidget {
   const LocationStatusCard({
     super.key,
@@ -20,7 +19,6 @@ class LocationStatusCard extends StatelessWidget {
   final VoidCallback onOpenAppSettings;
   final VoidCallback onOpenLocationSettings;
 
-  /// Manual start-point fallback; the link is hidden while this is null.
   final VoidCallback? onPickStartOnMap;
 
   @override
@@ -195,7 +193,6 @@ class _SheetContent {
     this.footer,
   });
 
-  /// Small uppercase label above the title.
   final String eyebrow;
   final Color color;
   final String title;

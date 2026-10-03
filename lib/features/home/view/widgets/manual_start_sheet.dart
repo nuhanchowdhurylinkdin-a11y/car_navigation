@@ -6,8 +6,6 @@ import 'point_row.dart';
 import 'sheet_parts.dart';
 import 'start_marker.dart';
 
-/// Guides the user through picking a start (A) and destination (B) on the map
-/// when device location is unavailable.
 class ManualStartSheet extends StatelessWidget {
   const ManualStartSheet({
     super.key,

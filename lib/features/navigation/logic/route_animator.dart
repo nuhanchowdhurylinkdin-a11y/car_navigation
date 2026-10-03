@@ -2,7 +2,6 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/geo/geo_math.dart';
 
-/// Where the car is after travelling a given distance along a route.
 class RouteSample {
   const RouteSample({
     required this.position,
@@ -13,24 +12,19 @@ class RouteSample {
 
   final LatLng position;
 
-  /// Direction of the current segment, 0° = north.
   final double bearing;
 
-  /// Index of the route point at the start of the current segment.
   final int segmentIndex;
 
-  /// Distance from the start, clamped to the route length.
   final double distance;
 }
 
-/// Pure geometry: maps "metres travelled" to a position and heading on a
-/// polyline. Speed is applied by the caller, so the car moves at a constant
-/// speed no matter how densely the route points are spaced.
 class RouteAnimator {
   RouteAnimator(List<LatLng> rawPoints, {this.minSegmentMeters = 0.5}) {
     final cleaned = <LatLng>[];
     for (final point in rawPoints) {
       if (!point.latitude.isFinite || !point.longitude.isFinite) continue;
+      // Drop repeated / near-identical points, zero-length segments would give NaN.
       if (cleaned.isNotEmpty && GeoMath.distanceMeters(cleaned.last, point) < minSegmentMeters) {
         continue;
       }
@@ -81,11 +75,9 @@ class RouteAnimator {
     );
   }
 
-  /// Points already driven: the route up to the car, ending at the car.
   List<LatLng> travelledPoints(RouteSample sample) =>
       [...points.sublist(0, sample.segmentIndex + 1), sample.position];
 
-  /// Binary search for the last segment whose start is at or before [d].
   int _segmentIndexFor(double d) {
     var low = 0;
     var high = _cumulative.length - 2;

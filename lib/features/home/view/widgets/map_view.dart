@@ -29,7 +29,6 @@ class MapView extends StatelessWidget {
   final MapController? mapController;
   final TileProvider? tileProvider;
 
-  /// Each event reloads the visible tiles (e.g. after the connection returns).
   final Stream<void>? tileReset;
   final GeoPosition? userPosition;
   final LatLng? destination;
@@ -38,13 +37,10 @@ class MapView extends StatelessWidget {
   final bool showPendingLine;
   final void Function(LatLng point)? onLongPress;
 
-  /// Called when the user pans, zooms or rotates the map by hand.
   final VoidCallback? onUserGesture;
 
-  /// Drawn just above the route line (e.g. the travelled part).
   final Widget? routeOverlay;
 
-  /// Drawn above every other layer (e.g. the car).
   final Widget? topOverlay;
 
   @override

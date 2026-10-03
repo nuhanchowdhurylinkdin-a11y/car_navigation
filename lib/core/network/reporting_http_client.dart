@@ -3,8 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
-/// Wraps an HTTP client and reports whether the server could be reached.
-/// Used for map tiles, whose own errors are silenced by flutter_map.
+// flutter_map hides tile errors when silenced, so this tells us if tiles can't load.
 class ReportingHttpClient extends http.BaseClient {
   ReportingHttpClient(
     this._inner, {

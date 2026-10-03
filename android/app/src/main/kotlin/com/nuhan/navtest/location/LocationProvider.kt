@@ -12,7 +12,6 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import io.flutter.plugin.common.MethodChannel
 
-/** Wraps FusedLocationProviderClient for one-shot location requests. */
 class LocationProvider(
     context: Context,
     private val permissions: PermissionManager,
@@ -45,8 +44,7 @@ class LocationProvider(
 
         val cts = CancellationTokenSource()
         activeRequests.add(cts)
-        // The fix and the timeout race each other; only the first may reply,
-        // otherwise Flutter throws "Reply already submitted".
+        // Fix and timeout can both fire. Reply only once or Flutter throws "Reply already submitted".
         var replied = false
 
         fun finish(block: () -> Unit) {
@@ -64,7 +62,6 @@ class LocationProvider(
         }
         handler.postDelayed(timeout, timeoutMs)
 
-        // Approximate-only permission cannot use high accuracy.
         val priority = if (permissions.hasFinePermission()) {
             Priority.PRIORITY_HIGH_ACCURACY
         } else {
@@ -93,8 +90,7 @@ class LocationProvider(
         }
     }
 
-    /** Cancels in-flight requests and pending timeouts; no reply is sent after this. */
-    fun dispose() {
+     fun dispose() {
         handler.removeCallbacksAndMessages(null)
         activeRequests.forEach { it.cancel() }
         activeRequests.clear()

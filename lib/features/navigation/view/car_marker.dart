@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/constants/colors.dart';
 
-/// Top-down car that points north at 0° and rotates to [bearing].
 class CarMarker extends StatelessWidget {
   const CarMarker({super.key, required this.bearing});
 

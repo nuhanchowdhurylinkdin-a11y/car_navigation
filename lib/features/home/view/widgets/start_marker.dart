@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/utils/constants/colors.dart';
 
-/// Green "A" marker for a start point picked on the map.
 class StartMarker extends StatelessWidget {
   const StartMarker({super.key, this.diameter = size});
 

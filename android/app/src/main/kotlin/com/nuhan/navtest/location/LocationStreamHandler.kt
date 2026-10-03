@@ -11,17 +11,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import io.flutter.plugin.common.EventChannel
 
-/**
- * Continuous location updates over an EventChannel.
- * Updates run only between onListen and onCancel: when Dart cancels its
- * subscription, the native location request is removed immediately.
- */
 class LocationStreamHandler(
     context: Context,
     private val permissions: PermissionManager,
     private val provider: LocationProvider,
 ) : EventChannel.StreamHandler {
-
     companion object {
         private const val TAG = "NavTestLocation"
         private const val INTERVAL_MS = 2_000L

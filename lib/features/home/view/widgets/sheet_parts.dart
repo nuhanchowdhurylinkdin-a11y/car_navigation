@@ -7,7 +7,6 @@ class SheetPanel extends StatelessWidget {
 
   final List<Widget> children;
 
-  /// Shows an indeterminate progress bar along the top edge when set.
   final Color? progressColor;
 
   @override
@@ -289,7 +288,6 @@ class SheetInfoChip extends StatelessWidget {
   }
 }
 
-/// Pulsing grey placeholder used while content is loading.
 class SkeletonBox extends StatefulWidget {
   const SkeletonBox({super.key, required this.width, required this.height});
 

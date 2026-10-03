@@ -88,7 +88,7 @@ class HomeScreen extends GetView<HomeController> {
                       ? Center(child: RecenterButton(onPressed: controller.recenterOnCar))
                       : const SizedBox.shrink(),
                 ),
-                // Kept outside the map so the sheet never covers the required credit.
+                // Outside the map so the bottom sheet never hides the OSM credit.
                 const OsmAttribution(),
                 Obx(_bottomSheet),
               ],

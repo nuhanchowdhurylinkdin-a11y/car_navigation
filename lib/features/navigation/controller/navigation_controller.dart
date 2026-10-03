@@ -8,8 +8,6 @@ import '../../directions/model/route_path.dart';
 import '../logic/navigation_simulator.dart';
 import '../logic/route_animator.dart';
 
-/// Drives the simulated car: owns the frame ticker, pauses on background,
-/// and exposes the car state to the UI.
 class NavigationController extends GetxController {
   NavigationController(this._route);
 

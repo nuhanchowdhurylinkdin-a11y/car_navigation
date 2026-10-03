@@ -3,7 +3,6 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../../core/utils/constants/colors.dart';
 
-/// One line describing a map point, e.g. "To: Selected pin (23.8155° N, 90.4180° E)".
 class PointRow extends StatelessWidget {
   const PointRow({
     super.key,

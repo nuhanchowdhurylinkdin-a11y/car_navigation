@@ -1,5 +1,3 @@
-/// Typed location errors. Native error codes are mapped to these in
-/// NativeLocationService, so the UI never parses strings.
 sealed class LocationException implements Exception {
   const LocationException(this.message);
 

@@ -5,9 +5,6 @@ import 'route_animator.dart';
 
 enum NavigationState { idle, running, paused, finished }
 
-/// Pure-Dart simulated drive along a route. The caller feeds it elapsed
-/// time with [tick]; it has no timers, widgets or GetX, so it is fully
-/// testable without a map.
 class NavigationSimulator {
   NavigationSimulator(
     this.animator, {
@@ -23,14 +20,10 @@ class NavigationSimulator {
 
   final RouteAnimator animator;
 
-  /// Real-world speed at 1x, in metres per second.
   final double baseSpeedMps;
 
-  /// Longest time step accepted per tick, so a stalled frame or a return
-  /// from background never makes the car jump.
   final Duration maxFrameStep;
 
-  /// How quickly the displayed heading catches up with the road (per second).
   final double turnRate;
 
   NavigationState _state = NavigationState.idle;
@@ -46,7 +39,6 @@ class NavigationSimulator {
   double get remainingMeters => math.max(0, totalMeters - _travelled);
   double get progress => totalMeters > 0 ? _travelled / totalMeters : 0;
 
-  /// Real-world driving time left at 1x speed.
   double get remainingSeconds => remainingMeters / baseSpeedMps;
 
   RouteSample get sample => _sample;
@@ -78,10 +70,10 @@ class NavigationSimulator {
     if (multipliers.contains(value)) _multiplier = value;
   }
 
-  /// Advances the car by [elapsed] of wall-clock time.
   void tick(Duration elapsed) {
     if (_state != NavigationState.running) return;
 
+    // Cap the step so a long frame (or coming back from background) never makes the car jump.
     final step = elapsed > maxFrameStep ? maxFrameStep : elapsed;
     final dt = step.inMicroseconds / Duration.microsecondsPerSecond;
     if (dt <= 0) return;

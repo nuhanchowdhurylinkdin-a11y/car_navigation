@@ -1,6 +1,5 @@
 import 'package:latlong2/latlong.dart';
 
-/// A single location fix received from the native layer.
 class GeoPosition {
   const GeoPosition({
     required this.latitude,
@@ -15,17 +14,13 @@ class GeoPosition {
   final double latitude;
   final double longitude;
 
-  /// Horizontal accuracy radius in metres.
   final double accuracy;
 
-  /// Direction of travel in degrees (0 = north), 0 when unknown.
   final double bearing;
 
-  /// Speed in metres per second, 0 when unknown.
   final double speed;
   final DateTime timestamp;
 
-  /// False when the user granted only approximate location.
   final bool isPrecise;
 
   LatLng get latLng => LatLng(latitude, longitude);

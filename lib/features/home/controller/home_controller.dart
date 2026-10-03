@@ -15,7 +15,6 @@ import '../../location/models/geo_position.dart';
 import '../../navigation/controller/navigation_controller.dart';
 import '../../navigation/logic/navigation_simulator.dart';
 
-/// Owns the map camera for the home screen.
 class HomeController extends GetxController {
   HomeController(this.location, this.route, this.navigation);
 
@@ -29,7 +28,6 @@ class HomeController extends GetxController {
   final mapController = MapController();
   final isFollowingCar = true.obs;
 
-  /// True while map tiles cannot be downloaded (no internet / DNS failure).
   final tilesUnavailable = false.obs;
 
   late final http.Client _tileHttpClient = ReportingHttpClient(
@@ -43,7 +41,6 @@ class HomeController extends GetxController {
   );
   final _tileReset = StreamController<void>.broadcast();
 
-  /// Emits when tiles should be reloaded (connection came back).
   Stream<void> get tileReset => _tileReset.stream;
 
   Worker? _firstFixWorker;
@@ -56,8 +53,7 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Center on the user once, when the first fix arrives. Later updates only
-    // move the dot, so the user can pan freely.
+    // Only jump to the user on the first fix, so later updates don't fight the user panning.
     _firstFixWorker = ever<GeoPosition?>(location.position, (fix) {
       if (fix == null || _centeredOnUser || isClosed) return;
       _centeredOnUser = true;

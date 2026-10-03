@@ -11,13 +11,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.flutter.plugin.common.MethodChannel
 
-/**
- * Checks and requests foreground location permission.
- *
- * Status strings returned to Dart: "granted", "denied", "deniedForever".
- */
 class PermissionManager(private val activity: Activity) {
-
     companion object {
         const val REQUEST_CODE = 4821
         const val GRANTED = "granted"
@@ -36,16 +30,14 @@ class PermissionManager(private val activity: Activity) {
     private val prefs = activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private var pendingResult: MethodChannel.Result? = null
 
-    /** True if either precise (FINE) or approximate (COARSE) location is granted. */
-    fun hasPermission(): Boolean = hasFinePermission() || isGranted(Manifest.permission.ACCESS_COARSE_LOCATION)
+     fun hasPermission(): Boolean = hasFinePermission() || isGranted(Manifest.permission.ACCESS_COARSE_LOCATION)
 
     fun hasFinePermission(): Boolean = isGranted(Manifest.permission.ACCESS_FINE_LOCATION)
 
     fun currentStatus(): String {
         if (hasPermission()) return GRANTED
-        // Android has no direct "permanently denied" API. After the user has answered
-        // the dialog at least once, a false rationale means the system will no longer
-        // show the dialog ("Don't ask again" / denied twice).
+        // Android can't tell us "don't ask again" directly. If the user already answered
+        // once and we're not allowed to show a rationale, the dialog won't appear anymore.
         val askedBefore = prefs.getBoolean(KEY_ASKED, false)
         val canShowDialog = ActivityCompat.shouldShowRequestPermissionRationale(
             activity, Manifest.permission.ACCESS_FINE_LOCATION,
@@ -66,18 +58,16 @@ class PermissionManager(private val activity: Activity) {
         ActivityCompat.requestPermissions(activity, PERMISSIONS, REQUEST_CODE)
     }
 
-    /** Called from MainActivity.onRequestPermissionsResult. Returns true if handled. */
-    fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray): Boolean {
+     fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray): Boolean {
         if (requestCode != REQUEST_CODE) return false
         val result = pendingResult ?: return true
         pendingResult = null
 
+        // Empty result = dialog was dismissed, not a real answer.
         if (grantResults.isEmpty()) {
-            // Dialog was dismissed without an answer (e.g. rotation); not a real denial.
             result.success(if (hasPermission()) GRANTED else DENIED)
             return true
         }
-        // Only mark as asked once the user actually answered the dialog.
         prefs.edit().putBoolean(KEY_ASKED, true).apply()
         result.success(currentStatus())
         return true

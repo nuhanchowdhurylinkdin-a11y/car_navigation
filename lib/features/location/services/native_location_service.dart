@@ -7,11 +7,6 @@ import '../models/location_exception.dart';
 import '../models/location_permission_status.dart';
 import 'location_service.dart';
 
-/// [LocationService] backed by our own platform channels
-/// (Kotlin on Android). This is the only class that touches the channels.
-///
-/// Platforms without a native implementation (e.g. iOS for now) surface as
-/// [MissingPluginException], which is reported as [LocationUnsupportedException].
 class NativeLocationService implements LocationService {
   NativeLocationService({
     MethodChannel methodChannel = const MethodChannel('com.nuhan.navtest/location'),
@@ -54,8 +49,8 @@ class NativeLocationService implements LocationService {
 
   @override
   Stream<GeoPosition> positionStream() async* {
-    // An EventChannel without a native handler fails silently, so probe the
-    // method channel first to surface "unsupported platform" as an error.
+    // A missing EventChannel handler fails silently, so hit the method channel
+    // first to get a proper "unsupported" error.
     await isServiceEnabled();
     yield* _events
         .receiveBroadcastStream()
@@ -84,7 +79,6 @@ class NativeLocationService implements LocationService {
     }
   }
 
-  /// Maps native error codes (see LocationErrors.kt) to typed exceptions.
   static LocationException mapError(Object error) => switch (error) {
         LocationException() => error,
         MissingPluginException() => const LocationUnsupportedException(),

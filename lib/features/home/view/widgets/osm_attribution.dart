@@ -4,8 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/constants/map_constants.dart';
 
-/// Required OpenStreetMap credit. Placed by the screen (not inside the map)
-/// so it always sits above the bottom sheet and stays visible.
 class OsmAttribution extends StatelessWidget {
   const OsmAttribution({super.key});
 

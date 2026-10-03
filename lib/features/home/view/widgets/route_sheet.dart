@@ -33,7 +33,6 @@ class RouteSheet extends StatelessWidget {
   final VoidCallback onClear;
   final VoidCallback? onStart;
 
-  /// Manually picked start point; null when routing from the device location.
   final LatLng? start;
   final VoidCallback? onChangeStart;
 
