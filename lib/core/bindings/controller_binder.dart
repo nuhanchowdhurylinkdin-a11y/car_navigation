@@ -7,6 +7,7 @@ import '../../features/home/controller/home_controller.dart';
 import '../../features/location/controller/location_controller.dart';
 import '../../features/location/services/location_service.dart';
 import '../../features/location/services/native_location_service.dart';
+import '../../features/navigation/controller/navigation_controller.dart';
 import '../config/flavor_config.dart';
 
 class ControllerBinder extends Bindings {
@@ -29,8 +30,16 @@ class ControllerBinder extends Bindings {
       ),
       fenix: true,
     );
+    Get.lazyPut<NavigationController>(
+      () => NavigationController(Get.find<RouteController>()),
+      fenix: true,
+    );
     Get.lazyPut<HomeController>(
-      () => HomeController(Get.find<LocationController>(), Get.find<RouteController>()),
+      () => HomeController(
+        Get.find<LocationController>(),
+        Get.find<RouteController>(),
+        Get.find<NavigationController>(),
+      ),
       fenix: true,
     );
   }

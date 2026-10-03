@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -14,21 +13,39 @@ class MapView extends StatelessWidget {
   const MapView({
     super.key,
     this.mapController,
+    this.tileProvider,
+    this.tileReset,
     this.userPosition,
     this.destination,
     this.manualStart,
     this.routePoints = const [],
     this.showPendingLine = false,
     this.onLongPress,
+    this.onUserGesture,
+    this.routeOverlay,
+    this.topOverlay,
   });
 
   final MapController? mapController;
+  final TileProvider? tileProvider;
+
+  /// Each event reloads the visible tiles (e.g. after the connection returns).
+  final Stream<void>? tileReset;
   final GeoPosition? userPosition;
   final LatLng? destination;
   final LatLng? manualStart;
   final List<LatLng> routePoints;
   final bool showPendingLine;
   final void Function(LatLng point)? onLongPress;
+
+  /// Called when the user pans, zooms or rotates the map by hand.
+  final VoidCallback? onUserGesture;
+
+  /// Drawn just above the route line (e.g. the travelled part).
+  final Widget? routeOverlay;
+
+  /// Drawn above every other layer (e.g. the car).
+  final Widget? topOverlay;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +62,18 @@ class MapView extends StatelessWidget {
         minZoom: MapConstants.minZoom,
         maxZoom: MapConstants.maxZoom,
         onLongPress: (_, point) => onLongPress?.call(point),
+        onPositionChanged: (_, hasGesture) {
+          if (hasGesture) onUserGesture?.call();
+        },
       ),
       children: [
         TileLayer(
           urlTemplate: MapConstants.osmTileUrl,
           userAgentPackageName: MapConstants.userAgentPackageName,
           maxZoom: MapConstants.maxZoom,
+          tileProvider: tileProvider,
+          reset: tileReset,
+          evictErrorTileStrategy: EvictErrorTileStrategy.notVisibleRespectMargin,
         ),
         if (showPendingLine && routeStart != null && target != null && routePoints.isEmpty)
           PolylineLayer(
@@ -75,6 +98,7 @@ class MapView extends StatelessWidget {
               ),
             ],
           ),
+        ?routeOverlay,
         if (user != null) ...[
           CircleLayer(
             circles: [
@@ -122,6 +146,7 @@ class MapView extends StatelessWidget {
               ),
             ],
           ),
+        ?topOverlay,
       ],
     );
   }
